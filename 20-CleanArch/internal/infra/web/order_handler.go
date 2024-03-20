@@ -47,3 +47,9 @@ func (h *WebOrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (h *WebOrderHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	getAllUseCase := usecase.NewGetAllOrderUseCase(h.OrderRepository)
+	output := getAllUseCase.Execute()
+	json.NewEncoder(w).Encode(output)
+}
