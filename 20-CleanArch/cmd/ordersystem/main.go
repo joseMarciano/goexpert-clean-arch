@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/devfullcycle/20-CleanArch/internal/infra/database"
+	"github.com/devfullcycle/20-CleanArch/internal/usecase"
 	"net"
 	"net/http"
 
@@ -52,7 +54,7 @@ func main() {
 	go webserver.Start()
 
 	grpcServer := grpc.NewServer()
-	createOrderService := service.NewOrderService(*createOrderUseCase)
+	createOrderService := service.NewOrderService(*createOrderUseCase, *usecase.NewGetAllOrderUseCase(database.NewOrderRepository(db)))
 	pb.RegisterOrderServiceServer(grpcServer, createOrderService)
 	reflection.Register(grpcServer)
 
