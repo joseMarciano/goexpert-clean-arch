@@ -20,5 +20,5 @@
 - **No GraphQL Server:**
   Acesse o playground e execute a query conforme a imagem abaixo:
 
-![img.png](img.png)
+![img.png](20-CleanArch/img.png)
 
