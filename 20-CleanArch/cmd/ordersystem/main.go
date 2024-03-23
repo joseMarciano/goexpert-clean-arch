@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/devfullcycle/20-CleanArch/internal/event"
 	"github.com/devfullcycle/20-CleanArch/internal/infra/database"
+	"github.com/devfullcycle/20-CleanArch/internal/infra/web"
 	"github.com/devfullcycle/20-CleanArch/internal/usecase"
 	"net"
 	"net/http"
@@ -44,14 +46,16 @@ func main() {
 		RabbitMQChannel: rabbitMQChannel,
 	})
 
-	createOrderUseCase := NewCreateOrderUseCase(db, eventDispatcher)
+	orderRepository := database.NewOrderRepository(db)
+	orderCreatedEvent := event.NewOrderCreated()
+	createOrderUseCase := usecase.NewCreateOrderUseCase(orderRepository, orderCreatedEvent, eventDispatcher)
 
-	webserver := webserver.NewWebServer(configs.WebServerPort)
-	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
-	webserver.AddHandler("/order", webOrderHandler.Create)
-	webserver.AddHandler("/order-get-all", webOrderHandler.GetAll)
+	server := webserver.NewWebServer(configs.WebServerPort)
+	webOrderHandler := web.NewWebOrderHandler(eventDispatcher, orderRepository, orderCreatedEvent)
+	server.AddHandler("/order", webOrderHandler.Create)
+	server.AddHandler("/order-get-all", webOrderHandler.GetAll)
 	fmt.Println("Starting web server on port", configs.WebServerPort)
-	go webserver.Start()
+	go server.Start()
 
 	grpcServer := grpc.NewServer()
 	createOrderService := service.NewOrderService(*createOrderUseCase, *usecase.NewGetAllOrderUseCase(database.NewOrderRepository(db)))
