@@ -7,12 +7,12 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: orders
-      MYSQL_PASSWORD: root
     ports:
       - 3306:3306
     volumes:
-      - .docker/mysql:/var/lib/mysql
+      - ./initDb:/initDb
+    command:  ["--init-file", "/initDb/init.sql"]
+
 
   rabbitmq:
     image: rabbitmq:3-management
